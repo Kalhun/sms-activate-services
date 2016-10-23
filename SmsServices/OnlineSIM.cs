@@ -40,6 +40,7 @@ namespace SmsServices
                     }
                     if (!answer.Contains("TZ_NUM_WAIT")) return null;
                     var number = new Regex("(?<=number\":\").*?(?=\")").Match(answer).Value;
+                    if (string.IsNullOrWhiteSpace(number)) throw new Exception($"Переменная {number} пуста");
                     if (TzidNumbers.ContainsKey(number))
                         TzidNumbers[number] = tzid;
                     else

@@ -47,13 +47,13 @@ namespace SmsServices
                 if (Regex.Match(answer, "(?<=response\":\").*?(?=\")").Value != "1") return null;
 
                 var tzid = new Regex("(?<=id\":).*?(?=,)").Match(answer).Value;
-                var num = new Regex("(?<=number\":\").*?(?=\")").Match(answer).Value;
-                if (string.IsNullOrWhiteSpace(tzid) || string.IsNullOrWhiteSpace(num)) return null;
-                if (TzidNumbers.ContainsKey(num))
-                    TzidNumbers[num] = tzid;
+                var number = new Regex("(?<=number\":\").*?(?=\")").Match(answer).Value;
+                if (string.IsNullOrWhiteSpace(number)) throw new Exception($"Переменная {number} пуста");
+                if (TzidNumbers.ContainsKey(number))
+                    TzidNumbers[number] = tzid;
                 else
-                    TzidNumbers.Add(num, tzid);
-                return num;
+                    TzidNumbers.Add(number, tzid);
+                return number;
             }
             catch (Exception e)
             {
