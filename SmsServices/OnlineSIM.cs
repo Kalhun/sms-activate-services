@@ -12,7 +12,7 @@ namespace SmsServices
             ApiKey = key;
         }
         
-        public float Price => 7;
+        public float Price => 3;
 
         private const string ViberKey = "viber";
         
@@ -40,7 +40,7 @@ namespace SmsServices
                     }
                     if (!answer.Contains("TZ_NUM_WAIT")) return null;
                     var number = new Regex("(?<=number\":\").*?(?=\")").Match(answer).Value;
-                    if (string.IsNullOrWhiteSpace(number)) throw new Exception($"Переменная {number} пуста");
+                    if (string.IsNullOrWhiteSpace(number)) throw new Exception($"{nameof(OnlineSim)} {nameof(GetNumber)} Переменная {number} пуста");
                     if (TzidNumbers.ContainsKey(number))
                         TzidNumbers[number] = tzid;
                     else

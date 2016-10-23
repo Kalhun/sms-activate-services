@@ -48,7 +48,7 @@ namespace SmsServices
 
                 var tzid = new Regex("(?<=id\":).*?(?=,)").Match(answer).Value;
                 var number = new Regex("(?<=number\":\").*?(?=\")").Match(answer).Value;
-                if (string.IsNullOrWhiteSpace(number)) throw new Exception($"Переменная {number} пуста");
+                if (string.IsNullOrWhiteSpace(number)) throw new Exception($"{nameof(SimSms)} {nameof(GetNumber)} Переменная {number} пуста");
                 if (TzidNumbers.ContainsKey(number))
                     TzidNumbers[number] = tzid;
                 else

@@ -39,6 +39,7 @@ namespace SmsServices
         }
 
         private const string ViberKey = "vi";
+
         public override string GetNumber()
         {
             try
@@ -63,7 +64,7 @@ namespace SmsServices
                 }
                 var tzid = Regex.Match(answer, "(?<=ACCESS_NUMBER:).*?(?=:)").Value;
                 string number = Regex.Match(answer, "(?<=\\d:).*").Value;
-                if (string.IsNullOrWhiteSpace(number)) throw new Exception($"Переменная {number} пуста");
+                if (string.IsNullOrWhiteSpace(number)) throw new Exception($"{nameof(SmsActivate)} {nameof(GetNumber)} Переменная {number} пуста");
                 if (TzidNumbers.ContainsKey(number))
                     TzidNumbers[number] = tzid;
                 else 

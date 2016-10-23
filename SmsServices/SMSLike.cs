@@ -68,7 +68,7 @@ namespace SmsServices
                 }
                 sw.Stop();
                 var number = Regex.Match(answer, "(?<=TZ_NUM_PREPARE:).*").Value;
-                if (string.IsNullOrWhiteSpace(number)) throw new Exception($"Переменная {number} пуста");
+                if (string.IsNullOrWhiteSpace(number)) throw new Exception($"{nameof(SmsLike)} {nameof(GetNumber)} Переменная {number} пуста");
                 if (TzidNumbers.ContainsKey(number))
                     TzidNumbers[number] = tzid;
                 else
