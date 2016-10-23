@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -16,8 +15,6 @@ namespace SmsServices
         public float Price => 7;
 
         private const string ViberKey = "viber";
-        
-        private readonly Dictionary<string, string> _tzidNumbers = new Dictionary<string, string>();
         
         public override string GetNumber()
         {
@@ -43,10 +40,10 @@ namespace SmsServices
                     }
                     if (!answer.Contains("TZ_NUM_WAIT")) return null;
                     var number = new Regex("(?<=number\":\").*?(?=\")").Match(answer).Value;
-                    if (_tzidNumbers.ContainsKey(number))
-                        _tzidNumbers[number] = tzid;
+                    if (TzidNumbers.ContainsKey(number))
+                        TzidNumbers[number] = tzid;
                     else
-                        _tzidNumbers.Add(number, tzid);
+                        TzidNumbers.Add(number, tzid);
                     return number;
                 }
                 sw.Stop();
@@ -65,7 +62,7 @@ namespace SmsServices
             {
                 Stopwatch sw = Stopwatch.StartNew();
                 string url = "http://onlinesim.ru/api/getState.php?" +
-                             $"tzid={_tzidNumbers[number]}&message_to_code=1&apikey={ApiKey}";
+                             $"tzid={TzidNumbers[number]}&message_to_code=1&apikey={ApiKey}";
                 string answer = GetResponse(url);
                 while (Regex.Match(answer, "(?<=response\":\").*?(?=\")").Value != "TZ_NUM_ANSWER" &&
                        (sw.ElapsedMilliseconds < timer))
@@ -76,7 +73,7 @@ namespace SmsServices
                 }
                 sw.Stop();
                 GetResponse("http://onlinesim.ru/api/setOperationOk.php?" +
-                            $"tzid={_tzidNumbers[number]}&apikey={ApiKey}");
+                            $"tzid={TzidNumbers[number]}&apikey={ApiKey}");
                 return new Regex("(?<=\"msg\":\").*?(?=\")").Match(answer).Value;
             }
             catch (Exception e)

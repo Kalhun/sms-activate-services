@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -40,15 +39,13 @@ namespace SmsServices
         }
 
         private const string ViberKey = "vi";
-        private readonly Dictionary<string, string> _tzidNumber = new Dictionary<string, string>();
-
         public override string GetNumber()
         {
             try
             {
-                var url = "http://sms-activate.ru/stubs/handler_api.php?" +
+                string url = "http://sms-activate.ru/stubs/handler_api.php?" +
                           $"api_key={ApiKey}&action=getNumber&service={ViberKey}";
-                var answer = GetResponse(url);
+                string answer = GetResponse(url);
                 switch (answer)
                 {
                     case "NO_NUMBERS":
@@ -65,9 +62,13 @@ namespace SmsServices
                         return null;
                 }
                 var tzid = Regex.Match(answer, "(?<=ACCESS_NUMBER:).*?(?=:)").Value;
-                var num = Regex.Match(answer, "(?<=\\d:).*").Value;
-                _tzidNumber.Add(num, tzid);
-                return num;
+                string number = Regex.Match(answer, "(?<=\\d:).*").Value;
+                if (string.IsNullOrWhiteSpace(number)) throw new Exception($"Переменная {number} пуста");
+                if (TzidNumbers.ContainsKey(number))
+                    TzidNumbers[number] = tzid;
+                else 
+                    TzidNumbers.Add(number, tzid);
+                return number;
             }
             catch (Exception e)
             {
@@ -80,14 +81,14 @@ namespace SmsServices
         {
             try
             {
-                var url = "http://sms-activate.ru/stubs/handler_api.php?" +
-                          $"api_key={ApiKey}&action=setStatus&status=1&id={_tzidNumber[number]}";
+                string url = "http://sms-activate.ru/stubs/handler_api.php?" +
+                          $"api_key={ApiKey}&action=setStatus&status=1&id={TzidNumbers[number]}";
                 GetResponse(url);
 
-                var sw = Stopwatch.StartNew();
+                Stopwatch sw = Stopwatch.StartNew();
                 url = "http://sms-activate.ru/stubs/handler_api.php?&" +
-                      $"id={_tzidNumber[number]}&api_key={ApiKey}&action=getStatus";
-                var answer = GetResponse(url);
+                      $"id={TzidNumbers[number]}&api_key={ApiKey}&action=getStatus";
+                string answer = GetResponse(url);
 
                 while (!answer.Contains("STATUS_OK") && (sw.ElapsedMilliseconds < timer))
                 {

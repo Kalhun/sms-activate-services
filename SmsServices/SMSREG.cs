@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -33,8 +32,6 @@ namespace SmsServices
             }
         }
         
-        private readonly Dictionary<string, string> _tzidNumbers = new Dictionary<string, string>();
-
         public override string GetNumber()
         {
             try
@@ -56,7 +53,10 @@ namespace SmsServices
                 }
                 sw.Stop();
                 var number = Regex.Match(answer, "(?<=number\":\").*?(?=\")").Value;
-                _tzidNumbers.Add(number, tzid);
+                if (TzidNumbers.ContainsKey(number))
+                    TzidNumbers[number] = tzid;
+                else
+                    TzidNumbers.Add(number, tzid);
                 return number;
             }
             catch (Exception e)
@@ -70,12 +70,12 @@ namespace SmsServices
         {
             try
             {
-                var url = "http://api.sms-reg.com/setReady.php?" + $"tzid={_tzidNumbers[number]}&apikey={ApiKey}";
+                var url = "http://api.sms-reg.com/setReady.php?" + $"tzid={TzidNumbers[number]}&apikey={ApiKey}";
                 var answer = GetResponse(url);
 
                 if (new Regex("(?<=response\":\").*?(?=\")").Match(answer).Value != "1") return null;
 
-                url = "http://api.sms-reg.com/getState.php?" + $"tzid={_tzidNumbers[number]}&apikey={ApiKey}";
+                url = "http://api.sms-reg.com/getState.php?" + $"tzid={TzidNumbers[number]}&apikey={ApiKey}";
                 answer = GetResponse(url);
 
                 var sw = Stopwatch.StartNew();

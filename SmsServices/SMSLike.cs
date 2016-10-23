@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -32,8 +31,6 @@ namespace SmsServices
                 return price;
             }
         }
-        
-        private readonly Dictionary<string, string> _tzidNumber = new Dictionary<string, string>();
         
         public override string GetNumber()
         {
@@ -71,7 +68,11 @@ namespace SmsServices
                 }
                 sw.Stop();
                 var number = Regex.Match(answer, "(?<=TZ_NUM_PREPARE:).*").Value;
-                _tzidNumber.Add(number, tzid);
+                if (string.IsNullOrWhiteSpace(number)) throw new Exception($"Переменная {number} пуста");
+                if (TzidNumbers.ContainsKey(number))
+                    TzidNumbers[number] = tzid;
+                else
+                    TzidNumbers.Add(number, tzid);
                 return number;
             }
             catch (Exception e)
@@ -86,13 +87,13 @@ namespace SmsServices
             try
             {
                 string url = "http://smslike.ru/index.php?mode=api" +
-                             $"&apikey={ApiKey}&action=setready&tz={_tzidNumber[number]}";
+                             $"&apikey={ApiKey}&action=setready&tz={TzidNumbers[number]}";
                 var answer = GetResponse(url);
 
                 if (!answer.Contains("OK_READY")) return null;
 
                 url = "http://smslike.ru/index.php?mode=api" +
-                      $"&apikey={ApiKey}&action=getstate&tz={_tzidNumber[number]}";
+                      $"&apikey={ApiKey}&action=getstate&tz={TzidNumbers[number]}";
                 answer = GetResponse(url);
 
                 Stopwatch sw = Stopwatch.StartNew();

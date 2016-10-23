@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Text;
 
@@ -6,6 +7,8 @@ namespace SmsServices
 {
     internal class BaseService
     {
+        protected readonly Dictionary<string, string> TzidNumbers = new Dictionary<string, string>();
+
         protected string ApiKey { get; set; }
 
         public Logger Lgr { protected get; set; }

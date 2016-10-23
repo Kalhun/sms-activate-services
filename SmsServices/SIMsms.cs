@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -37,21 +36,23 @@ namespace SmsServices
         }
 
         private const string ViberKey = "opt11";
-        private readonly Dictionary<string, string> _tzidNumber = new Dictionary<string, string>();
-        
+
         public override string GetNumber()
         {
             try
             {
-                var number =
+                var answer =
                     GetResponse("http://simsms.org/priemnik.php?" +
                                 $"metod=get_number&country=ru&service={ViberKey}&id=1&apikey={ApiKey}");
-                if (Regex.Match(number, "(?<=response\":\").*?(?=\")").Value != "1") return null;
+                if (Regex.Match(answer, "(?<=response\":\").*?(?=\")").Value != "1") return null;
 
-                var tzid = new Regex("(?<=id\":).*?(?=,)").Match(number).Value;
-                var num = new Regex("(?<=number\":\").*?(?=\")").Match(number).Value;
+                var tzid = new Regex("(?<=id\":).*?(?=,)").Match(answer).Value;
+                var num = new Regex("(?<=number\":\").*?(?=\")").Match(answer).Value;
                 if (string.IsNullOrWhiteSpace(tzid) || string.IsNullOrWhiteSpace(num)) return null;
-                _tzidNumber.Add(num, tzid);
+                if (TzidNumbers.ContainsKey(num))
+                    TzidNumbers[num] = tzid;
+                else
+                    TzidNumbers.Add(num, tzid);
                 return num;
             }
             catch (Exception e)
@@ -66,7 +67,7 @@ namespace SmsServices
             try
             {
                 var url = "http://simsms.org/priemnik.php?" +
-                          $"metod=get_sms&country=ru&service={ViberKey}&id={_tzidNumber[numer]}&apikey={ApiKey}";
+                          $"metod=get_sms&country=ru&service={ViberKey}&id={TzidNumbers[numer]}&apikey={ApiKey}";
                 var answer = GetResponse(url);
 
                 var sw = Stopwatch.StartNew();
